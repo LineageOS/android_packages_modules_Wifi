@@ -71,6 +71,7 @@ import android.net.wifi.IOnWifiActivityEnergyInfoListener;
 import android.net.wifi.IOnWifiUsabilityStatsListener;
 import android.net.wifi.IScanResultsCallback;
 import android.net.wifi.ISoftApCallback;
+import android.net.wifi.IStaStateCallback;
 import android.net.wifi.ISubsystemRestartCallback;
 import android.net.wifi.ISuggestionConnectionStatusListener;
 import android.net.wifi.ISuggestionUserApprovalStatusListener;
@@ -220,6 +221,7 @@ public class WifiServiceImpl extends BaseWifiService {
             WifiManager.VERBOSE_LOGGING_LEVEL_DISABLED;
     private final RemoteCallbackList<IWifiVerboseLoggingStatusChangedListener>
             mRegisteredWifiLoggingStatusListeners = new RemoteCallbackList<>();
+    private final WifiStaStateNotifier mWifiStaStateNotifier;
 
     private final FrameworkFacade mFrameworkFacade;
 
@@ -365,6 +367,7 @@ public class WifiServiceImpl extends BaseWifiService {
         mLastCallerInfoManager = mWifiInjector.getLastCallerInfoManager();
         mBuildProperties = mWifiInjector.getBuildProperties();
         mDefaultClientModeManager = mWifiInjector.getDefaultClientModeManager();
+        mWifiStaStateNotifier = mWifiInjector.getWifiStaStateNotifier();
     }
 
     /**
@@ -4348,6 +4351,27 @@ public class WifiServiceImpl extends BaseWifiService {
         }
         // Post operation to handler thread
         mWifiThreadRunner.post(() -> mWifiTrafficPoller.removeCallback(callback));
+    }
+
+    @Override
+    public void registerStaStateCallback(IStaStateCallback callback) {
+        if (callback == null) {
+            throw new IllegalArgumentException("Callback must not be null");
+        }
+        if (isVerboseLoggingEnabled()) {
+            mLog.info("registerStaStateCallback uid=%").c(Binder.getCallingUid()).flush();
+        }
+        mWifiThreadRunner.post(() ->
+            mWifiStaStateNotifier.addCallback(callback));
+    }
+
+    @Override
+    public void unregisterStaStateCallback(IStaStateCallback callback) {
+        if (isVerboseLoggingEnabled()) {
+            mLog.info("unregisterStaStateCallback uid=%").c(Binder.getCallingUid()).flush();
+        }
+        mWifiThreadRunner.post(() ->
+            mWifiStaStateNotifier.removeCallback(callback));
     }
 
     private long getSupportedFeaturesInternal() {

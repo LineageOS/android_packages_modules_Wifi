@@ -35,6 +35,7 @@ import android.net.wifi.ISoftApCallback;
 import android.net.wifi.ISubsystemRestartCallback;
 import android.net.wifi.ISuggestionConnectionStatusListener;
 import android.net.wifi.ISuggestionUserApprovalStatusListener;
+import android.net.wifi.IStaStateCallback;
 import android.net.wifi.ITrafficStateCallback;
 import android.net.wifi.IWifiConnectedNetworkScorer;
 import android.net.wifi.IWifiVerboseLoggingStatusChangedListener;
@@ -337,4 +338,8 @@ interface IWifiManager
     void flushPasspointAnqpCache(String packageName);
 
     List<WifiAvailableChannel> getUsableChannels(int band, int mode, int filter);
+
+    void registerStaStateCallback(in IStaStateCallback callback);
+
+    void unregisterStaStateCallback(in IStaStateCallback callback);
 }
