@@ -29,6 +29,7 @@ import android.net.wifi.IOnWifiActivityEnergyInfoListener;
 import android.net.wifi.IOnWifiUsabilityStatsListener;
 import android.net.wifi.IScanResultsCallback;
 import android.net.wifi.ISoftApCallback;
+import android.net.wifi.IStaStateCallback;
 import android.net.wifi.ISubsystemRestartCallback;
 import android.net.wifi.ISuggestionConnectionStatusListener;
 import android.net.wifi.ISuggestionUserApprovalStatusListener;
@@ -748,6 +749,11 @@ public class BaseWifiService extends IWifiManager.Stub {
     }
 
     @Override
+    public void registerStaStateCallback(IStaStateCallback callback) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void removeSuggestionUserApprovalStatusListener(
             ISuggestionUserApprovalStatusListener listener, String packageName) {
         throw new UnsupportedOperationException();
@@ -776,6 +782,11 @@ public class BaseWifiService extends IWifiManager.Stub {
     @Override
     public List<WifiAvailableChannel> getUsableChannels(
             int band, int mode, int filter) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void unregisterStaStateCallback(IStaStateCallback callback) {
         throw new UnsupportedOperationException();
     }
 }

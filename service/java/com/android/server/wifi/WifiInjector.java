@@ -153,6 +153,7 @@ public class WifiInjector {
     private final WifiVendorHal mWifiVendorHal;
     private final ScoringParams mScoringParams;
     private final ActiveModeWarden mActiveModeWarden;
+    private final WifiStaStateNotifier mWifiStaStateNotifier;
     private final WifiSettingsStore mSettingsStore;
     private final OpenNetworkNotifier mOpenNetworkNotifier;
     private final WifiLockManager mLockManager;
@@ -517,6 +518,7 @@ public class WifiInjector {
         mSimRequiredNotifier = new SimRequiredNotifier(mContext, mFrameworkFacade,
                 mWifiNotificationManager);
         mLastCallerInfoManager = new LastCallerInfoManager();
+        mWifiStaStateNotifier = new WifiStaStateNotifier(this);
     }
 
     /**
@@ -628,6 +630,10 @@ public class WifiInjector {
 
     public ActiveModeWarden getActiveModeWarden() {
         return mActiveModeWarden;
+    }
+
+    public WifiStaStateNotifier getWifiStaStateNotifier() {
+        return mWifiStaStateNotifier;
     }
 
     public WifiSettingsStore getWifiSettingsStore() {
