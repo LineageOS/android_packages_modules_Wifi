@@ -35,6 +35,24 @@
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5f7f5bd0_fb6eb143",
+        "filename": "service/java/com/android/server/wifi/ActiveModeWarden.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 2107,
+      "author": {
+        "id": 24262
+      },
+      "writtenOn": "2022-02-25T16:40:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e4db8df4_e6e07abe",
+      "revId": "3129444707987240e3b836a5ac935f227376f3cf",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d407e9b4_ebaf4b70",
@@ -48,6 +66,24 @@
       "writtenOn": "2022-02-25T16:35:37Z",
       "side": 1,
       "message": "ws",
+      "revId": "3129444707987240e3b836a5ac935f227376f3cf",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "bf55804f_abbebc31",
+        "filename": "service/java/com/android/server/wifi/BaseWifiService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 750,
+      "author": {
+        "id": 24262
+      },
+      "writtenOn": "2022-02-25T16:40:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d407e9b4_ebaf4b70",
       "revId": "3129444707987240e3b836a5ac935f227376f3cf",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     },
@@ -69,6 +105,24 @@
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "0ed24812_23926a30",
+        "filename": "service/java/com/android/server/wifi/BaseWifiService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 787,
+      "author": {
+        "id": 24262
+      },
+      "writtenOn": "2022-02-25T16:40:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8b3ccda4_e8c204ca",
+      "revId": "3129444707987240e3b836a5ac935f227376f3cf",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "258cab9c_105e7342",
@@ -82,6 +136,24 @@
       "writtenOn": "2022-02-25T16:35:37Z",
       "side": 1,
       "message": "space vs tab",
+      "revId": "3129444707987240e3b836a5ac935f227376f3cf",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5945e3c7_85691b6b",
+        "filename": "service/java/com/android/server/wifi/WifiInjector.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 521,
+      "author": {
+        "id": 24262
+      },
+      "writtenOn": "2022-02-25T16:40:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "258cab9c_105e7342",
       "revId": "3129444707987240e3b836a5ac935f227376f3cf",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
