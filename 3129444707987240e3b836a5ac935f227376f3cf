@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0782b700_ddd13015",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 24262
+      },
+      "writtenOn": "2022-02-25T16:28:44Z",
+      "side": 1,
+      "message": "Works fine on my device (unofficial), can\u0027t test VoWiFi though (it\u0027s dead on Lineage, already on R)",
+      "revId": "3129444707987240e3b836a5ac935f227376f3cf",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
