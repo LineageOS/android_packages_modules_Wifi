@@ -16,6 +16,74 @@
       "message": "Works fine on my device (unofficial), can\u0027t test VoWiFi though (it\u0027s dead on Lineage, already on R)",
       "revId": "3129444707987240e3b836a5ac935f227376f3cf",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e4db8df4_e6e07abe",
+        "filename": "service/java/com/android/server/wifi/ActiveModeWarden.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 2107,
+      "author": {
+        "id": 17793
+      },
+      "writtenOn": "2022-02-25T16:35:37Z",
+      "side": 1,
+      "message": "whitespace",
+      "revId": "3129444707987240e3b836a5ac935f227376f3cf",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d407e9b4_ebaf4b70",
+        "filename": "service/java/com/android/server/wifi/BaseWifiService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 750,
+      "author": {
+        "id": 17793
+      },
+      "writtenOn": "2022-02-25T16:35:37Z",
+      "side": 1,
+      "message": "ws",
+      "revId": "3129444707987240e3b836a5ac935f227376f3cf",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8b3ccda4_e8c204ca",
+        "filename": "service/java/com/android/server/wifi/BaseWifiService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 787,
+      "author": {
+        "id": 17793
+      },
+      "writtenOn": "2022-02-25T16:35:37Z",
+      "side": 1,
+      "message": "WS",
+      "revId": "3129444707987240e3b836a5ac935f227376f3cf",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "258cab9c_105e7342",
+        "filename": "service/java/com/android/server/wifi/WifiInjector.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 521,
+      "author": {
+        "id": 17793
+      },
+      "writtenOn": "2022-02-25T16:35:37Z",
+      "side": 1,
+      "message": "space vs tab",
+      "revId": "3129444707987240e3b836a5ac935f227376f3cf",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
