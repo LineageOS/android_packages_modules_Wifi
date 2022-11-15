@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7dc1ab14_e79449ec",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 13648
+      },
+      "writtenOn": "2022-11-15T17:31:27Z",
+      "side": 1,
+      "message": "I remember that this was needed for really old devices. Which ones survived until this branch?",
+      "revId": "a4f8a902514a633bbefc524f1ccea174d4ce07e1",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
