@@ -34,6 +34,23 @@
       "parentUuid": "7dc1ab14_e79449ec",
       "revId": "a4f8a902514a633bbefc524f1ccea174d4ce07e1",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "733c3cfb_4c1281c3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 22176
+      },
+      "writtenOn": "2022-11-18T09:56:08Z",
+      "side": 1,
+      "message": "yes working fine in my old device",
+      "revId": "a4f8a902514a633bbefc524f1ccea174d4ce07e1",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
