@@ -51,6 +51,24 @@
       "message": "yes working fine in my old device",
       "revId": "a4f8a902514a633bbefc524f1ccea174d4ce07e1",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d34b9353_34544722",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 13648
+      },
+      "writtenOn": "2022-11-18T11:23:54Z",
+      "side": 1,
+      "message": "Define old device. We are not going to merge stuff that is only needed for devices that will never be able to ship.",
+      "parentUuid": "733c3cfb_4c1281c3",
+      "revId": "a4f8a902514a633bbefc524f1ccea174d4ce07e1",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
