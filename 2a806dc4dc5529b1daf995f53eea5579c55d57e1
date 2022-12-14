@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f1bb3d6c_7e7f4659",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 8752
+      },
+      "writtenOn": "2022-12-14T09:17:35Z",
+      "side": 1,
+      "message": "Patch is supposed to replace my first attempt:\nhttps://android-review.googlesource.com/c/platform/packages/modules/Wifi/+/2337749",
+      "revId": "2a806dc4dc5529b1daf995f53eea5579c55d57e1",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
