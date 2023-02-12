@@ -35,6 +35,24 @@
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "488be366_fac41078",
+        "filename": "service/java/com/android/server/wifi/WifiServiceImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 28024
+      },
+      "writtenOn": "2023-02-12T11:43:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1ca3f3f9_20a90154",
+      "revId": "dd45ff026a741d079eb695361de85cf4283033b0",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "ec77d4c2_3e09684d",
@@ -52,6 +70,24 @@
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "372b3651_a0784abb",
+        "filename": "service/java/com/android/server/wifi/WifiServiceImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 5319,
+      "author": {
+        "id": 28024
+      },
+      "writtenOn": "2023-02-12T11:43:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ec77d4c2_3e09684d",
+      "revId": "dd45ff026a741d079eb695361de85cf4283033b0",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "c80682cf_38a791bf",
@@ -65,6 +101,24 @@
       "writtenOn": "2023-02-12T09:14:38Z",
       "side": 1,
       "message": "8 spaces",
+      "revId": "dd45ff026a741d079eb695361de85cf4283033b0",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1031c519_0dedf746",
+        "filename": "service/java/com/android/server/wifi/WifiServiceImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 5328,
+      "author": {
+        "id": 28024
+      },
+      "writtenOn": "2023-02-12T11:43:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c80682cf_38a791bf",
       "revId": "dd45ff026a741d079eb695361de85cf4283033b0",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
