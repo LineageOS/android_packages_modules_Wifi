@@ -158,7 +158,7 @@ package android.net.wifi {
   @Deprecated public class WifiConfiguration implements android.os.Parcelable {
     ctor @Deprecated public WifiConfiguration();
     ctor @Deprecated public WifiConfiguration(@NonNull android.net.wifi.WifiConfiguration);
-    method public int describeContents();
+    method @Deprecated public int describeContents();
     method @Deprecated public android.net.ProxyInfo getHttpProxy();
     method @Deprecated @NonNull public String getKey();
     method @Deprecated public int getMacRandomizationSetting();
@@ -169,7 +169,7 @@ package android.net.wifi {
     method @Deprecated public void setIpConfiguration(@Nullable android.net.IpConfiguration);
     method @Deprecated public void setMacRandomizationSetting(int);
     method @Deprecated public void setSecurityParams(int);
-    method public void writeToParcel(android.os.Parcel, int);
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
     field @Deprecated public String BSSID;
     field @Deprecated public String FQDN;
     field @Deprecated public static final int RANDOMIZATION_AUTO = 3; // 0x3
@@ -373,6 +373,7 @@ package android.net.wifi {
     method @NonNull public java.util.List<android.net.wifi.MloLink> getAffiliatedMloLinks();
     method @Nullable public android.net.MacAddress getApMldMacAddress();
     method @IntRange(from=android.net.wifi.MloLink.INVALID_MLO_LINK_ID, to=0xf) public int getApMloLinkId();
+    method public long getApplicableRedactions();
     method @NonNull public java.util.List<android.net.wifi.MloLink> getAssociatedMloLinks();
     method public String getBSSID();
     method public int getCurrentSecurityType();
@@ -426,6 +427,7 @@ package android.net.wifi {
     method @NonNull public android.net.wifi.WifiInfo.Builder setNetworkId(int);
     method @NonNull public android.net.wifi.WifiInfo.Builder setRssi(int);
     method @NonNull public android.net.wifi.WifiInfo.Builder setSsid(@NonNull byte[]);
+    method @FlaggedApi("com.android.wifi.flags.add_subscription_id") @NonNull public android.net.wifi.WifiInfo.Builder setSubscriptionId(int);
   }
 
   public class WifiManager {
@@ -497,6 +499,7 @@ package android.net.wifi {
     method public boolean isTlsV13Supported();
     method public boolean isTrustOnFirstUseSupported();
     method public boolean isWapiSupported();
+    method @FlaggedApi("com.android.wifi.flags.wep_usage") public boolean isWepSupported();
     method public boolean isWifiDisplayR2Supported();
     method public boolean isWifiEnabled();
     method @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public boolean isWifiPasspointEnabled();
@@ -505,6 +508,7 @@ package android.net.wifi {
     method public boolean isWpa3SaePublicKeySupported();
     method public boolean isWpa3SaeSupported();
     method public boolean isWpa3SuiteBSupported();
+    method @FlaggedApi("com.android.wifi.flags.wpa_personal_usage") public boolean isWpaPersonalSupported();
     method @Deprecated public boolean pingSupplicant();
     method public void queryAutojoinGlobal(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @Deprecated public boolean reassociate();

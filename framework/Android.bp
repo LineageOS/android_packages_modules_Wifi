@@ -52,6 +52,16 @@ filegroup {
     srcs: ["java/android/net/wifi/WifiAnnotations.java"],
 }
 
+filegroup {
+    name: "wifi_javadoc_only_files",
+    srcs: ["java/android/net/wifi/package.html",
+           "java/android/net/wifi/rtt/package.html",
+           "java/android/net/wifi/p2p/package.html",
+           "java/android/net/wifi/aware/package.html",
+    ],
+    path: "java/android/net/wifi",
+}
+
 // list of tests that are allowed to access @hide APIs from framework-wifi
 test_access_hidden_api_whitelist = [
     "//frameworks/base/wifi/tests",
@@ -99,7 +109,6 @@ java_defaults {
     libs: [
         "androidx.annotation_annotation",
         "unsupportedappusage", // for android.compat.annotation.UnsupportedAppUsage
-        "framework-connectivity.stubs.module_lib",
         "app-compat-annotations",
     ],
     aidl: {
@@ -120,7 +129,11 @@ java_library {
     name: "framework-wifi-pre-jarjar",
     defaults: ["framework-wifi-defaults"],
     sdk_version: "module_current",
-    libs: ["framework-annotations-lib"],
+    libs: [
+        "framework-annotations-lib",
+        "framework-connectivity.stubs.module_lib",
+        "framework-location.stubs.module_lib",
+    ],
     installable: false,
     visibility: [
         "//frameworks/opt/net/wifi/service",
@@ -138,7 +151,23 @@ java_sdk_library {
         "framework-wifi-defaults",
     ],
 
-    stub_only_libs: ["framework-connectivity.stubs.module_lib"],
+    impl_only_libs: [
+        "framework-location.stubs.module_lib",
+        "framework-connectivity.stubs.module_lib",
+    ],
+
+    public: {
+        libs: ["framework-location.stubs", "framework-connectivity.stubs"]
+    },
+    system: {
+        libs: ["framework-location.stubs.system", "framework-connectivity.stubs.system"]
+    },
+    module_lib: {
+        libs: ["framework-location.stubs.module_lib", "framework-connectivity.stubs.module_lib"]
+    },
+    api_srcs: [
+        ":wifi_javadoc_only_files",
+    ],
 
     jarjar_rules: ":wifi-jarjar-rules",
 

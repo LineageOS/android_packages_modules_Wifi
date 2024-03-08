@@ -19,6 +19,7 @@ package android.net.wifi;
 import static android.net.wifi.WifiConfiguration.INVALID_NETWORK_ID;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -38,8 +39,10 @@ import android.net.TransportInfo;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
+import android.util.SparseArray;
 
 import androidx.annotation.RequiresApi;
 
@@ -76,6 +79,7 @@ import java.util.Objects;
  */
 public class WifiInfo implements TransportInfo, Parcelable {
     private static final String TAG = "WifiInfo";
+
     /**
      * This is the map described in the Javadoc comment above. The positions
      * of the elements of the array must correspond to the ordinal values
@@ -130,6 +134,9 @@ public class WifiInfo implements TransportInfo, Parcelable {
      * Only applicable for Wi-Fi 7 access points.
      */
     private int mApMloLinkId;
+
+    /** Maps link id to Affiliated MLO links. */
+    private SparseArray<MloLink> mAffiliatedMloLinksMap = new SparseArray<>();
 
     /**
      * The Multi-Link Operation (MLO) affiliated Links.
@@ -213,6 +220,7 @@ public class WifiInfo implements TransportInfo, Parcelable {
      * Received Signal Strength Indicator
      */
     private int mRssi;
+    private long mLastRssiUpdateMillis;
 
     /**
      * Wi-Fi standard for the connection
@@ -718,6 +726,17 @@ public class WifiInfo implements TransportInfo, Parcelable {
         }
 
         /**
+         * Set the subscription ID.
+         * @see WifiInfo#getSubscriptionId()
+         */
+        @FlaggedApi("com.android.wifi.flags.add_subscription_id")
+        @NonNull
+        public Builder setSubscriptionId(int subId) {
+            mWifiInfo.setSubscriptionId(subId);
+            return this;
+        }
+
+        /**
          * Set the current security type
          * @see WifiInfo#getCurrentSecurityType()
          */
@@ -805,6 +824,13 @@ public class WifiInfo implements TransportInfo, Parcelable {
         mApMloLinkId = linkId;
     }
 
+    private void mapAffiliatedMloLinks() {
+        mAffiliatedMloLinksMap.clear();
+        for (MloLink link : mAffiliatedMloLinks) {
+            mAffiliatedMloLinksMap.put(link.getLinkId(), link);
+        }
+    }
+
     /**
      * Set the Multi-Link Operation (MLO) affiliated Links.
      * Only applicable for Wi-Fi 7 access points.
@@ -813,6 +839,7 @@ public class WifiInfo implements TransportInfo, Parcelable {
      */
     public void setAffiliatedMloLinks(@NonNull List<MloLink> links) {
         mAffiliatedMloLinks = new ArrayList<MloLink>(links);
+        mapAffiliatedMloLinks();
     }
 
     /**
@@ -923,6 +950,11 @@ public class WifiInfo implements TransportInfo, Parcelable {
         return new ArrayList<MloLink>(mAffiliatedMloLinks);
     }
 
+    /** @hide */
+    public MloLink getAffiliatedMloLink(int linkId) {
+        return mAffiliatedMloLinksMap.get(linkId);
+    }
+
     /**
      * Return the associated Multi-Link Operation (MLO) Links for Wi-Fi 7 access points.
      * i.e. when {@link #getWifiStandard()} returns {@link ScanResult#WIFI_STANDARD_11BE}.
@@ -969,6 +1001,14 @@ public class WifiInfo implements TransportInfo, Parcelable {
         if (rssi > MAX_RSSI)
             rssi = MAX_RSSI;
         mRssi = rssi;
+        mLastRssiUpdateMillis = SystemClock.elapsedRealtime();
+    }
+
+    /**
+     * @hide
+     */
+    public long getLastRssiUpdateMillis() {
+        return mLastRssiUpdateMillis;
     }
 
     /**
@@ -1130,7 +1170,7 @@ public class WifiInfo implements TransportInfo, Parcelable {
 
     /**
      * Returns the MAC address used for this connection. In case of Multi Link Operation (MLO),
-     * returned value is the mac address of the link used for association.
+     * returned value is the Station MLD MAC address.
      *
      * @return MAC address of the connection or {@code "02:00:00:00:00:00"} if the caller has
      * insufficient permission.

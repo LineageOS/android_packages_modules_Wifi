@@ -16,6 +16,8 @@
 
 package com.android.server.wifi.mockwifi;
 
+import static android.os.UserHandle.CURRENT;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -30,8 +32,8 @@ import com.android.server.wifi.WifiMonitor;
 public class MockWifiServiceUtil {
     private static final String TAG = "MockWifiModemUtil";
     private static final String BIND_NL80211 = "android.wifi.mockwifimodem.nl80211";
-    private static final int MOCK_NL80211_SERVICE = 0;
 
+    public static final int MOCK_NL80211_SERVICE = 0;
     public static final int MIN_SERVICE_IDX = MOCK_NL80211_SERVICE;
     public static final int NUM_SERVICES = 1;
     public static final int BINDER_RETRY_MILLIS = 3 * 100;
@@ -95,8 +97,16 @@ public class MockWifiServiceUtil {
         intent.setComponent(new ComponentName(mPackageName, mServiceName));
         intent.setAction(actionName);
 
-        status = mContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+        status = mContext.createContextAsUser(CURRENT, 0)
+                .bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
         return status;
+    }
+
+    /**
+     * Unbind of the provided service.
+     */
+    public void unbindMockModemService() {
+        mContext.unbindService(mMockNl80211ServiceConnection);
     }
 
     /** waitForBinder */
@@ -191,5 +201,18 @@ public class MockWifiServiceUtil {
     public WifiNl80211Manager getWifiNl80211Manager() {
         return mMockWifiNl80211Manager == null
                 ? null : mMockWifiNl80211Manager.getWifiNl80211Manager();
+    }
+
+    /**
+     * Get method configured status based on service.
+     */
+    public boolean getIsMethodConfigured(int service, String methodName) {
+        switch (service) {
+            case MOCK_NL80211_SERVICE:
+                return getWifiNl80211Manager() != null
+                        && getMockWifiNl80211Manager().isMethodConfigured(methodName);
+            default:
+                return false;
+        }
     }
 }
