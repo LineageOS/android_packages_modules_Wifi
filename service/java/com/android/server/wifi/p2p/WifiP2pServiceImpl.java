@@ -5141,7 +5141,6 @@ public class WifiP2pServiceImpl extends IWifiP2pManager.Stub {
                 receiverPermissionsForTetheringRequest = RECEIVER_PERMISSIONS_FOR_TETHERING;
             }
             Intent intent = getP2pConnectionChangedIntent();
-            intent.setPackage(tetheringServicePackage);
             if (SdkLevel.isAtLeastU()) {
                 // Adding the flag to allow recipient to run at foreground priority with a shorter
                 // timeout interval.
