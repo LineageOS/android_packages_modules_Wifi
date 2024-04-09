@@ -5100,39 +5100,8 @@ public class WifiP2pServiceImpl extends IWifiP2pManager.Stub {
                     TAG + " " + message);
         }
 
-        private boolean isPackageExisted(String pkgName) {
-            PackageManager pm = mContext.getPackageManager();
-            try {
-                PackageInfo info = pm.getPackageInfo(pkgName, PackageManager.GET_META_DATA);
-            } catch (PackageManager.NameNotFoundException e) {
-                return false;
-            }
-            return true;
-        }
-
-        private String findTetheringServicePackage() {
-            ArrayList<String> possiblePackageNames = new ArrayList<>();
-            // AOSP
-            possiblePackageNames.add("com.android.networkstack.tethering");
-            // mainline release
-            possiblePackageNames.add("com.google.android.networkstack.tethering");
-            // Android Go
-            possiblePackageNames.add("com.android.networkstack.tethering.inprocess");
-
-            for (String pkgName: possiblePackageNames) {
-                if (isPackageExisted(pkgName)) {
-                    return pkgName;
-                }
-            }
-            Log.w(TAG, "Cannot find tethering service package!");
-            return null;
-        }
-
         private boolean sendP2pTetherRequestBroadcast() {
-            String tetheringServicePackage = findTetheringServicePackage();
-            if (TextUtils.isEmpty(tetheringServicePackage)) return false;
-            Log.i(TAG, "sending p2p tether request broadcast to "
-                    + tetheringServicePackage);
+            Log.i(TAG, "sending p2p tether request broadcast");
 
             String[] receiverPermissionsForTetheringRequest = {
                     android.Manifest.permission.TETHER_PRIVILEGED
@@ -5141,7 +5110,6 @@ public class WifiP2pServiceImpl extends IWifiP2pManager.Stub {
                 receiverPermissionsForTetheringRequest = RECEIVER_PERMISSIONS_FOR_TETHERING;
             }
             Intent intent = getP2pConnectionChangedIntent();
-            intent.setPackage(tetheringServicePackage);
             if (SdkLevel.isAtLeastU()) {
                 // Adding the flag to allow recipient to run at foreground priority with a shorter
                 // timeout interval.
