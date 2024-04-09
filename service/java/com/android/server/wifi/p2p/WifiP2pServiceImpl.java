@@ -178,6 +178,7 @@ import java.util.stream.Collectors;
  */
 public class WifiP2pServiceImpl extends IWifiP2pManager.Stub {
     private static final String TAG = "WifiP2pService";
+    private static final String ANDROID_SYSTEM_PACKAGE = "android";
     @VisibleForTesting
     public static final String P2P_IDLE_SHUTDOWN_MESSAGE_TIMEOUT_TAG = TAG
             + " Idle Shutdown Message Timeout";
@@ -5049,6 +5050,11 @@ public class WifiP2pServiceImpl extends IWifiP2pManager.Stub {
                 sendP2pTetherRequestBroadcast();
                 // Then send the same broadcast to remaining apps excluding Tethering package
                 sendBroadcastWithExcludedPermissions(intent, RECEIVER_PERMISSIONS_FOR_TETHERING);
+                // Finally, send to the system. The system has the tethering permission, and
+                // and sendP2pTetherRequestBroadcast uses the explicit tethering package, so
+                // the system (and thus WifiDisplayController) isn't included without this.
+                intent.setPackage(ANDROID_SYSTEM_PACKAGE);
+                sendBroadcastWithExcludedPermissions(intent, null);
             } else {
                 sendBroadcastWithExcludedPermissions(intent, null);
             }
