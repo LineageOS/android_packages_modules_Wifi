@@ -5129,10 +5129,7 @@ public class WifiP2pServiceImpl extends IWifiP2pManager.Stub {
         }
 
         private boolean sendP2pTetherRequestBroadcast() {
-            String tetheringServicePackage = findTetheringServicePackage();
-            if (TextUtils.isEmpty(tetheringServicePackage)) return false;
-            Log.i(TAG, "sending p2p tether request broadcast to "
-                    + tetheringServicePackage);
+            Log.i(TAG, "sending p2p tether request broadcast");
 
             String[] receiverPermissionsForTetheringRequest = {
                     android.Manifest.permission.TETHER_PRIVILEGED
@@ -5141,7 +5138,6 @@ public class WifiP2pServiceImpl extends IWifiP2pManager.Stub {
                 receiverPermissionsForTetheringRequest = RECEIVER_PERMISSIONS_FOR_TETHERING;
             }
             Intent intent = getP2pConnectionChangedIntent();
-            intent.setPackage(tetheringServicePackage);
             if (SdkLevel.isAtLeastU()) {
                 // Adding the flag to allow recipient to run at foreground priority with a shorter
                 // timeout interval.
