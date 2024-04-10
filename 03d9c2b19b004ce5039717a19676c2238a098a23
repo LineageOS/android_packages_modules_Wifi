@@ -33,6 +33,24 @@
       "message": "this whole block is now dead code 😊",
       "revId": "03d9c2b19b004ce5039717a19676c2238a098a23",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7e14afe7_25cc31e6",
+        "filename": "service/java/com/android/server/wifi/p2p/WifiP2pServiceImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 5132,
+      "author": {
+        "id": 31604
+      },
+      "writtenOn": "2024-04-10T14:48:55Z",
+      "side": 1,
+      "message": "Worse than dead in a way, since if the tethering package wasn\u0027t found, we\u0027d be back to square one with the system or others not getting the broadcast.",
+      "parentUuid": "222f4bae_5ada2257",
+      "revId": "03d9c2b19b004ce5039717a19676c2238a098a23",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
