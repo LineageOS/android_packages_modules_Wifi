@@ -29,6 +29,9 @@ import static android.net.wifi.SoftApCapability.SOFTAP_FEATURE_WPA3_OWE;
 import static android.net.wifi.SoftApCapability.SOFTAP_FEATURE_WPA3_OWE_TRANSITION;
 import static android.net.wifi.SoftApCapability.SOFTAP_FEATURE_WPA3_SAE;
 
+import static com.android.server.wifi.HalDeviceManager.HDM_CREATE_IFACE_AP_BRIDGE;
+import static com.android.server.wifi.HalDeviceManager.HDM_CREATE_IFACE_STA;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -437,12 +440,14 @@ public class ApConfigUtil {
             // If HAL doesn't support getUsableChannels then return null
             return null;
         }
-        List<Integer> regulatoryList = usableChannelList.stream()
-                .map(ch -> inFrequencyMHz
-                        ? ch.getFrequencyMhz()
-                        : ScanResult.convertFrequencyMhzToChannelIfSupported(
-                                ch.getFrequencyMhz()))
-                .collect(Collectors.toList());
+        List<Integer> regulatoryList = new ArrayList<>();
+        if (inFrequencyMHz) {
+            usableChannelList.forEach(a -> regulatoryList.add(a.getFrequencyMhz()));
+        } else {
+            usableChannelList.forEach(a -> regulatoryList.add(ScanResult
+                    .convertFrequencyMhzToChannelIfSupported(a.getFrequencyMhz())));
+
+        }
         return addDfsChannelsIfNeeded(regulatoryList, scannerBand, wifiNative, resources,
                 inFrequencyMHz);
     }
@@ -1071,22 +1076,33 @@ public class ApConfigUtil {
      * Helper function to get HAL support bridged AP or not.
      *
      * @param context the caller context used to get value from resource file.
+     * @param wifiNative to get the Iface combination from device.
      * @return true if supported, false otherwise.
      */
-    public static boolean isBridgedModeSupported(@NonNull Context context) {
+    public static boolean isBridgedModeSupported(
+            @NonNull Context context, @NonNull WifiNative wifiNative) {
         return SdkLevel.isAtLeastS() && context.getResources().getBoolean(
-                    R.bool.config_wifiBridgedSoftApSupported);
+                    R.bool.config_wifiBridgedSoftApSupported)
+                    && wifiNative.canDeviceSupportCreateTypeCombo(new SparseArray<Integer>() {{
+                            put(HDM_CREATE_IFACE_AP_BRIDGE, 1);
+                        }});
     }
 
     /**
      * Helper function to get HAL support STA + bridged AP or not.
      *
      * @param context the caller context used to get value from resource file.
+     * @param wifiNative to get the Iface combination from device.
      * @return true if supported, false otherwise.
      */
-    public static boolean isStaWithBridgedModeSupported(@NonNull Context context) {
+    public static boolean isStaWithBridgedModeSupported(
+            @NonNull Context context, @NonNull WifiNative wifiNative) {
         return SdkLevel.isAtLeastS() && context.getResources().getBoolean(
-                    R.bool.config_wifiStaWithBridgedSoftApConcurrencySupported);
+                    R.bool.config_wifiStaWithBridgedSoftApConcurrencySupported)
+                    && wifiNative.canDeviceSupportCreateTypeCombo(new SparseArray<Integer>() {{
+                            put(HDM_CREATE_IFACE_AP_BRIDGE, 1);
+                            put(HDM_CREATE_IFACE_STA, 1);
+                        }});
     }
 
     /**
@@ -1507,20 +1523,31 @@ public class ApConfigUtil {
         return deepCopyMap;
     }
 
-
     /**
      * Observer the available channel from native layer (vendor HAL if getUsableChannels is
      * supported, or wificond if not supported) and update the SoftApCapability
      *
      * @param softApCapability the current softap capability
      * @param context the caller context used to get value from resource file
-     * @param wifiNative reference used to collect regulatory restrictions.     *
+     * @param wifiNative reference used to collect regulatory restrictions.
+     * @param channelMap the channel for each band
      * @return updated soft AP capability
      */
     public static SoftApCapability updateSoftApCapabilityWithAvailableChannelList(
             @NonNull SoftApCapability softApCapability, @NonNull Context context,
-            @NonNull WifiNative wifiNative) {
+            @NonNull WifiNative wifiNative, @NonNull SparseArray<int[]> channelMap) {
         SoftApCapability newSoftApCapability = new SoftApCapability(softApCapability);
+        if (channelMap != null) {
+            for (int band : SoftApConfiguration.BAND_TYPES) {
+                if (isSoftApBandSupported(context, band)) {
+                    int[] supportedChannelList = channelMap.get(band);
+                    if (supportedChannelList != null) {
+                        newSoftApCapability.setSupportedChannelList(band, supportedChannelList);
+                    }
+                }
+            }
+            return newSoftApCapability;
+        }
         List<Integer> supportedChannelList = null;
 
         for (int band : SoftApConfiguration.BAND_TYPES) {

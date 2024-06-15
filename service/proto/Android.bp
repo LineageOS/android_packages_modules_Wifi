@@ -13,6 +13,7 @@
 // limitations under the License.
 
 package {
+    default_team: "trendy_team_fwk_wifi_hal",
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
@@ -24,6 +25,7 @@ java_library {
     sdk_version: "system_current",
     min_sdk_version: "30",
     srcs: ["src/scorecard.proto"],
+    apex_available: ["com.android.wifi"],
 }
 
 java_library {
@@ -45,4 +47,5 @@ java_library {
             static_libs: ["libprotobuf-java-nano"],
         },
     },
+    apex_available: ["com.android.wifi"],
 }

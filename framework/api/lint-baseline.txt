@@ -77,11 +77,11 @@ RequiresPermission: android.net.wifi.p2p.WifiP2pManager#requestPeers(android.net
     Method 'requestPeers' documentation mentions permissions already declared by @RequiresPermission
 RequiresPermission: android.net.wifi.p2p.WifiP2pManager#startListening(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.ActionListener):
     Method 'startListening' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.net.wifi.p2p.WifiP2pManager#startPeerDiscovery(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pDiscoveryConfig, android.net.wifi.p2p.WifiP2pManager.ActionListener):
+    Method 'startPeerDiscovery' documentation mentions permissions already declared by @RequiresPermission
 RequiresPermission: android.net.wifi.rtt.WifiRttManager#startRanging(android.net.wifi.rtt.RangingRequest, java.util.concurrent.Executor, android.net.wifi.rtt.RangingResultCallback):
     Method 'startRanging' documentation mentions permissions already declared by @RequiresPermission
 
 
-VisiblySynchronized: PsiThisExpression:
-    Internal locks must not be exposed (synchronizing on this or class is still externally observable): method android.net.wifi.WifiManager.WifiLock.finalize()
 VisiblySynchronized: android.net.wifi.WifiManager.WifiLock#finalize():
     Internal locks must not be exposed (synchronizing on this or class is still externally observable): method android.net.wifi.WifiManager.WifiLock.finalize()
