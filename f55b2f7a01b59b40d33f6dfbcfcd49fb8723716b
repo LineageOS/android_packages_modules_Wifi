@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "16baba84_8fd68d22",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 16185
+      },
+      "writtenOn": "2025-09-26T22:02:38Z",
+      "side": 1,
+      "message": "```\npackages/modules/Wifi/service/java/com/android/server/wifi/WifiMetrics.java:2878: error: no suitable method found for write(int,boolean,boolean,boolean,int)\n        WifiStatsLog.write(WifiStatsLog.WIFI_STATE_CHANGED, wifiState, wifiWakeState,\n                    ^\n    method WifiStatsLog.write(int,int[],String[],int,int) is not applicable\n      (argument mismatch; boolean cannot be converted to int[])\n    method WifiStatsLog.write(int,int[],String[],int,String) is not applicable\n      (argument mismatch; boolean cannot be converted to int[])\n    method WifiStatsLog.write(int,int,int,boolean,int) is not applicable  \n      (argument mismatch; boolean cannot be converted to int)\n    method WifiStatsLog.write(int,int,int,String,int) is not applicable   \n      (argument mismatch; boolean cannot be converted to int)\nNote: Some messages have been simplified; recompile with -Xdiags:verbose to get full output\n```\n?",
+      "revId": "f55b2f7a01b59b40d33f6dfbcfcd49fb8723716b",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
