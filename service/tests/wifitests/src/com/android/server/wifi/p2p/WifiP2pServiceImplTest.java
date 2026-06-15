@@ -1571,6 +1571,42 @@ public class WifiP2pServiceImplTest extends WifiBaseTest {
         }
     }
 
+    @Test
+    public void testAddLocalServiceFailureWithInternalMessageBypassAttempt() throws Exception {
+        setTargetSdkGreaterThanT();
+        forceP2pEnabled(mClient1);
+        doNothing().when(mWifiPermissionsUtil).checkPackage(anyInt(), anyString());
+        if (SdkLevel.isAtLeastT()) {
+            when(mWifiPermissionsUtil.checkNearbyDevicesPermission(any(), anyBoolean(), any()))
+                    .thenReturn(false);
+        } else {
+            when(mWifiPermissionsUtil.checkCanAccessWifiDirect(any(), any(), anyInt(),
+                    anyBoolean())).thenReturn(false);
+        }
+
+        // Send AddLocalService message, but inject EXTRA_PARAM_KEY_INTERNAL_MESSAGE
+        Message msg = Message.obtain();
+        int untrustedUid = Process.myUid() + 10000; // Use a UID different from the service's UID
+        msg.sendingUid = untrustedUid;
+        Bundle extras = new Bundle();
+        extras.putParcelable(WifiP2pManager.EXTRA_PARAM_KEY_SERVICE_INFO, mTestWifiP2pServiceInfo);
+        extras.putBoolean(WifiP2pManager.EXTRA_PARAM_KEY_INTERNAL_MESSAGE, true);
+        msg.what = WifiP2pManager.ADD_LOCAL_SERVICE;
+        if (SdkLevel.isAtLeastS()) {
+            msg.obj = new AttributionSource(untrustedUid, TEST_PACKAGE_NAME, null);
+        }
+        msg.getData().putBundle(WifiP2pManager.EXTRA_PARAM_KEY_BUNDLE, extras);
+        msg.replyTo = mClientMessenger;
+        mP2pStateMachineMessenger.send(Message.obtain(msg));
+        mLooper.dispatchAll();
+
+        // The request should fail because the sender is not a system UID or privileged.
+        // But on unmodified code, it will bypass permission check and
+        // succeed (or try to call native).
+        assertTrue(mClientHandler.hasMessages(WifiP2pManager.ADD_LOCAL_SERVICE_FAILED));
+        verify(mWifiNative, never()).p2pServiceAdd(any());
+    }
+
     private void verifyAddLocalService() throws Exception {
         doNothing().when(mWifiPermissionsUtil).checkPackage(anyInt(), anyString());
         when(mWifiNative.p2pServiceAdd(any())).thenReturn(true);

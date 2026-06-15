@@ -4418,7 +4418,8 @@ public class WifiP2pServiceImpl extends IWifiP2pManager.Stub {
         private boolean checkNearbyDevicesPermission(int uid, String packageName, Bundle extras,
                 String message, Object attributionSource) {
             if (extras != null
-                    && extras.getBoolean(WifiP2pManager.EXTRA_PARAM_KEY_INTERNAL_MESSAGE)) {
+                    && extras.getBoolean(WifiP2pManager.EXTRA_PARAM_KEY_INTERNAL_MESSAGE)
+                    && uid == Process.myUid()) {
                 // bypass permission check for internal call.
                 return true;
             }
