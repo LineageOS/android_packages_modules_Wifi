@@ -2083,8 +2083,12 @@ public class WifiServiceImpl extends IWifiManager.Stub {
      */
     @Override
     public boolean validateSoftApConfiguration(SoftApConfiguration config) {
-        int pid = Binder.getCallingPid();
-        int uid = Binder.getCallingUid();
+        return validateSoftApConfigurationInternal(config, Binder.getCallingUid(),
+                Binder.getCallingPid());
+    }
+
+    private boolean validateSoftApConfigurationInternal(SoftApConfiguration config,
+            int uid, int pid) {
         boolean privileged = isSettingsOrSuw(pid, uid)
                 || checkNetworkStackPermission(pid, uid)
                 || checkMainlineNetworkStackPermission(pid, uid);
@@ -2157,9 +2161,10 @@ public class WifiServiceImpl extends IWifiManager.Stub {
         }
 
         if (!startSoftApInternal(new SoftApModeConfiguration(
-                WifiManager.IFACE_IP_MODE_TETHERED, softApConfig,
-                mTetheredSoftApTracker.getSoftApCapability(),
-                mCountryCode.getCountryCode(), null), requestorWs, null)) {
+                        WifiManager.IFACE_IP_MODE_TETHERED, softApConfig,
+                        mTetheredSoftApTracker.getSoftApCapability(),
+                        mCountryCode.getCountryCode(), null),
+                requestorWs, null, callingUid, Binder.getCallingPid())) {
             mTetheredSoftApTracker.setFailedWhileEnabling();
             return false;
         }
@@ -2192,9 +2197,10 @@ public class WifiServiceImpl extends IWifiManager.Stub {
 
         mLog.info("startTetheredHotspot uid=%").c(callingUid).flush();
         return startTetheredHotspotInternal(new SoftApModeConfiguration(
-                WifiManager.IFACE_IP_MODE_TETHERED, softApConfig,
-                mTetheredSoftApTracker.getSoftApCapability(),
-                mCountryCode.getCountryCode(), null /* request */), callingUid, packageName, null);
+                        WifiManager.IFACE_IP_MODE_TETHERED, softApConfig,
+                        mTetheredSoftApTracker.getSoftApCapability(),
+                        mCountryCode.getCountryCode(), null /* request */),
+                callingUid, Binder.getCallingPid(), packageName, null);
     }
 
     /**
@@ -2234,11 +2240,12 @@ public class WifiServiceImpl extends IWifiManager.Stub {
 
         mLog.info("startTetheredHotspot uid=%").c(callingUid).flush();
         startTetheredHotspotInternal(new SoftApModeConfiguration(
-                WifiManager.IFACE_IP_MODE_TETHERED,
-                com.android.net.flags.Flags.tetheringWithSoftApConfig()
-                        ? request.getSoftApConfiguration() : null,
-                mTetheredSoftApTracker.getSoftApCapability(),
-                mCountryCode.getCountryCode(), request), callingUid, packageName, callback);
+                        WifiManager.IFACE_IP_MODE_TETHERED,
+                        com.android.net.flags.Flags.tetheringWithSoftApConfig()
+                                ? request.getSoftApConfiguration() : null,
+                        mTetheredSoftApTracker.getSoftApCapability(),
+                        mCountryCode.getCountryCode(), request),
+                callingUid, Binder.getCallingPid(), packageName, callback);
     }
 
     private void sendSoftApCallbackStartFailure(@Nullable ISoftApCallback callback,
@@ -2257,7 +2264,8 @@ public class WifiServiceImpl extends IWifiManager.Stub {
      * proper permissions beyond the NetworkStack permission.
      */
     private boolean startTetheredHotspotInternal(@NonNull SoftApModeConfiguration modeConfig,
-            int callingUid, String packageName, @Nullable ISoftApCallback callback) {
+            int callingUid, int callingPid, String packageName,
+            @Nullable ISoftApCallback callback) {
         TetheringManager.TetheringRequest tetheringRequest = modeConfig.getTetheringRequest();
         if (mActiveModeWarden.isSoftApRestartingForCcChange(IFACE_IP_MODE_TETHERED)) {
             mLog.err("Tethering is in the middle of restarting for CC change.").flush();
@@ -2281,12 +2289,12 @@ public class WifiServiceImpl extends IWifiManager.Stub {
             Binder.restoreCallingIdentity(id);
         }
 
-        if (!startSoftApInternal(modeConfig, requestorWs, callback)) {
+        if (!startSoftApInternal(modeConfig, requestorWs, callback, callingUid, callingPid)) {
             mTetheredSoftApTracker.setFailedWhileEnabling();
             return false;
         }
         mLastCallerInfoManager.put(WifiManager.API_TETHERED_HOTSPOT, Process.myTid(),
-                callingUid, Binder.getCallingPid(), packageName, true);
+                callingUid, callingPid, packageName, true);
         return true;
     }
 
@@ -2295,15 +2303,14 @@ public class WifiServiceImpl extends IWifiManager.Stub {
      * proper permissions beyond the NetworkStack permission.
      */
     private boolean startSoftApInternal(SoftApModeConfiguration apConfig, WorkSource requestorWs,
-            @Nullable ISoftApCallback callback) {
-        int uid = Binder.getCallingUid();
-        mLog.trace("startSoftApInternal uid=% mode=%")
-                .c(uid).c(apConfig.getTargetMode()).flush();
+            @Nullable ISoftApCallback callback, int uid, int pid) {
+        mLog.trace("startSoftApInternal uid=% pid=% mode=%")
+                .c(uid).c(pid).c(apConfig.getTargetMode()).flush();
 
         // null wifiConfig is a meaningful input for CMD_SET_AP; it means to use the persistent
         // AP config.
         SoftApConfiguration softApConfig = apConfig.getSoftApConfiguration();
-        if (softApConfig != null && !validateSoftApConfiguration(softApConfig)) {
+        if (softApConfig != null && !validateSoftApConfigurationInternal(softApConfig, uid, pid)) {
             Log.e(TAG, "Invalid SoftApConfiguration");
             if (callback != null) {
                 try {
@@ -3069,8 +3076,14 @@ public class WifiServiceImpl extends IWifiManager.Stub {
             mActiveConfig = new SoftApModeConfiguration(
                     WifiManager.IFACE_IP_MODE_LOCAL_ONLY,
                     softApConfig, lohsCapability, mCountryCode.getCountryCode(), null);
+            int uid = -1;
+            WorkSource ws = request.getWorkSource();
+            if (ws != null && !ws.isEmpty()) {
+                uid = ws.getUid(0);
+            }
+            int pid = request.getPid();
             // Report the error if we got failure in startSoftApInternal
-            if (!startSoftApInternal(mActiveConfig, request.getWorkSource(), null)) {
+            if (!startSoftApInternal(mActiveConfig, request.getWorkSource(), null, uid, pid)) {
                 onStateChanged(new SoftApState(
                         WIFI_AP_STATE_FAILED, SAP_START_FAILURE_GENERAL,
                         mActiveConfig.getTetheringRequest(), null /* iface */));
