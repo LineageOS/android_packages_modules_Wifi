@@ -590,6 +590,8 @@ public class WifiP2pServiceImpl extends IWifiP2pManager.Stub {
         final DeathRecipient mDeathRecipient;
         final Messenger mMessenger;
         final WorkSource mWorkSource;
+        // TODO(b/515051007): mDisplayId is unused and should be removed.
+        @Deprecated
         final int mDisplayId;
     }
     private Object mLock = new Object();
@@ -807,6 +809,7 @@ public class WifiP2pServiceImpl extends IWifiP2pManager.Stub {
         // get the DisplayId of the caller (if available)
         int displayId = Display.DEFAULT_DISPLAY;
         if (mWifiPermissionsUtil.isSystem(packageName, callerUid)) {
+            mWifiPermissionsUtil.checkPackage(callerUid, packageName);
             displayId = extras.getInt(WifiP2pManager.EXTRA_PARAM_KEY_DISPLAY_ID,
                     Display.DEFAULT_DISPLAY);
         }
