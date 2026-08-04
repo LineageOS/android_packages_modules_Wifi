@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "400f9df9_1761ee04",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 33857
+      },
+      "writtenOn": "2026-08-04T19:53:38Z",
+      "side": 1,
+      "message": "Verified on OnePlus 6T(fajita, k4.19).",
+      "revId": "eef4fc7d39409dafccd881f9477e18eab8b0ff26",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
