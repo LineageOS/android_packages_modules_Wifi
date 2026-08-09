@@ -16,6 +16,23 @@
       "message": "Verified on OnePlus 6T(fajita, k4.19).",
       "revId": "eef4fc7d39409dafccd881f9477e18eab8b0ff26",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "27b7d742_99535b64",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 16779
+      },
+      "writtenOn": "2026-08-09T23:13:51Z",
+      "side": 1,
+      "message": "Not needed with https://review.lineageos.org/c/LineageOS/android_device_oneplus_sdm845-common/+/496175",
+      "revId": "eef4fc7d39409dafccd881f9477e18eab8b0ff26",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
