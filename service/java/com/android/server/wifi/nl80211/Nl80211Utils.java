@@ -20,6 +20,7 @@ import static android.system.OsConstants.EBUSY;
 import static android.system.OsConstants.EINVAL;
 import static android.system.OsConstants.ENODEV;
 import static android.system.OsConstants.ENOENT;
+import static android.system.OsConstants.EOPNOTSUPP;
 
 import static com.android.net.module.util.netlink.StructNlMsgHdr.NLM_F_ACK;
 import static com.android.server.wifi.nl80211.NetlinkConstants.ANDROID_NL80211_SUBCMD_GET_PWRSTATS;
@@ -2633,12 +2634,19 @@ public class Nl80211Utils {
             request.addAttribute(freqsAttr);
         }
 
-        request.addAttribute(new StructNlAttr(NL80211_ATTR_SCAN_FLAGS, scanFlags));
+        if (scanFlags != 0) {
+            request.addAttribute(new StructNlAttr(NL80211_ATTR_SCAN_FLAGS, scanFlags));
+        }
 
         Nl80211Response response = mNl80211Proxy.sendMessageAndReceiveResponse(request);
         if (response == null) {
             Log.e(TAG, "Failed to send NL80211_CMD_TRIGGER_SCAN");
             return WifiScanner.REASON_UNSPECIFIED;
+        }
+
+        if (response.getErrorCode() == EOPNOTSUPP && scanFlags != 0) {
+            Log.w(TAG, "Scan flags unsupported, retrying without optional flags");
+            return triggerScan(ifIndex, 0, freqs, hiddenNetworkSSIDs, vendorIes);
         }
 
         return convertStdErrNumToScanStatus(response.getErrorCode());

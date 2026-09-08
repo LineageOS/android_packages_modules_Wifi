@@ -19,6 +19,7 @@ package com.android.server.wifi.nl80211;
 import static android.system.OsConstants.EBUSY;
 import static android.system.OsConstants.ENODEV;
 import static android.system.OsConstants.ENOENT;
+import static android.system.OsConstants.EOPNOTSUPP;
 
 import static com.android.server.wifi.nl80211.NetlinkConstants.NL80211_ATTR_BSS;
 import static com.android.server.wifi.nl80211.NetlinkConstants.NL80211_ATTR_EXT_FEATURES;
@@ -1055,6 +1056,27 @@ public class Nl80211UtilsTest {
         GenericNetlinkMsg request = requestCaptor.getValue();
         assertNotNull(request);
         assertEquals(scanFlags, (int) request.getAttributeValueAsInteger(NL80211_ATTR_SCAN_FLAGS));
+    }
+
+    @Test
+    public void testTriggerScan_unsupportedScanFlags_retriesWithoutFlags() {
+        ArgumentCaptor<GenericNetlinkMsg> requestCaptor =
+                ArgumentCaptor.forClass(GenericNetlinkMsg.class);
+        when(mNl80211Proxy.sendMessageAndReceiveResponse(requestCaptor.capture()))
+                .thenReturn(new Nl80211Response(EOPNOTSUPP), new Nl80211Response(0));
+        when(mNl80211Proxy.createNl80211Request(eq(NL80211_CMD_TRIGGER_SCAN), anyShort()))
+                .thenAnswer(i -> new GenericNetlinkMsg(
+                        NL80211_CMD_TRIGGER_SCAN, (short) 0, (short) 0, 0));
+
+        int result = mNl80211Utils.triggerScan(TEST_IF_INDEX,
+                NL80211_SCAN_FLAG_RANDOM_ADDR, null, null, null);
+
+        assertEquals(WifiScanner.REASON_SUCCEEDED, result);
+        List<GenericNetlinkMsg> requests = requestCaptor.getAllValues();
+        assertEquals(2, requests.size());
+        assertEquals(NL80211_SCAN_FLAG_RANDOM_ADDR,
+                (int) requests.get(0).getAttributeValueAsInteger(NL80211_ATTR_SCAN_FLAGS));
+        assertNull(requests.get(1).getAttribute(NL80211_ATTR_SCAN_FLAGS));
     }
 
     @Test
