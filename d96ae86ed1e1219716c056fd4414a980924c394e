@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "72bcacbe_982a1f5d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 32245
+      },
+      "writtenOn": "2026-09-08T09:21:39Z",
+      "side": 1,
+      "message": "AOSP 17 QPR2 beta GSI have WIFI working properly, so the fix should be already landed in AOSP internally, no need to submit this to AOSP I guess?",
+      "revId": "d96ae86ed1e1219716c056fd4414a980924c394e",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
