@@ -581,6 +581,36 @@ public class Nl80211UtilsTest {
     }
 
     @Test
+    public void testParseWiphyInfo_unrelatedFeatureFlags_doNotEnableRandomMacScan() {
+        GenericNetlinkMsg msg = createBasicWiphyInfoMsg();
+        msg.addAttribute(createWiphyBandsAttribute());
+        msg.addAttribute(new StructNlAttr(NL80211_ATTR_FEATURE_FLAGS,
+                (1 << NetlinkConstants.NL80211_FEATURE_SK_TX_STATUS)
+                        | (1 << NetlinkConstants.NL80211_FEATURE_HT_IBSS)));
+
+        Nl80211Utils.WiphyInfo info = mNl80211Utils.parseWiphyInfo(List.of(msg));
+
+        assertNotNull(info);
+        assertFalse(info.wiphyFeatures.supportsRandomMacOneShotScan);
+        assertFalse(info.wiphyFeatures.supportsRandomMacSchedScan);
+    }
+
+    @Test
+    public void testParseWiphyInfo_randomMacFeatureFlags_enableRandomMacScan() {
+        GenericNetlinkMsg msg = createBasicWiphyInfoMsg();
+        msg.addAttribute(createWiphyBandsAttribute());
+        msg.addAttribute(new StructNlAttr(NL80211_ATTR_FEATURE_FLAGS,
+                (1 << NetlinkConstants.NL80211_FEATURE_SCAN_RANDOM_MAC_ADDR)
+                        | (1 << NetlinkConstants.NL80211_FEATURE_SCHED_SCAN_RANDOM_MAC_ADDR)));
+
+        Nl80211Utils.WiphyInfo info = mNl80211Utils.parseWiphyInfo(List.of(msg));
+
+        assertNotNull(info);
+        assertTrue(info.wiphyFeatures.supportsRandomMacOneShotScan);
+        assertTrue(info.wiphyFeatures.supportsRandomMacSchedScan);
+    }
+
+    @Test
     public void testParseWiphyInfo_antennas_success() {
         GenericNetlinkMsg msg = createBasicWiphyInfoMsg();
         msg.addAttribute(createWiphyBandsAttribute());

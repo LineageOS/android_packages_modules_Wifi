@@ -2266,9 +2266,9 @@ public class Nl80211Utils {
 
     private WiphyFeatures createWiphyFeatures(int featureFlags, byte[] extFeatureFlagsBytes) {
         boolean supportsRandomMacOneShotScan =
-                (featureFlags & NL80211_FEATURE_SCAN_RANDOM_MAC_ADDR) != 0;
+                (featureFlags & (1 << NL80211_FEATURE_SCAN_RANDOM_MAC_ADDR)) != 0;
         boolean supportsRandomMacSchedScan =
-                (featureFlags & NL80211_FEATURE_SCHED_SCAN_RANDOM_MAC_ADDR) != 0;
+                (featureFlags & (1 << NL80211_FEATURE_SCHED_SCAN_RANDOM_MAC_ADDR)) != 0;
 
         boolean supportsLowSpanOneShotScan = isExtFeatureFlagSet(extFeatureFlagsBytes,
                 NL80211_EXT_FEATURE_LOW_SPAN_SCAN);
