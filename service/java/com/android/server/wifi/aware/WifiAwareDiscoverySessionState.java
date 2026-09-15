@@ -143,6 +143,13 @@ public class WifiAwareDiscoverySessionState {
         mDbg = verbose;
     }
 
+    /**
+     * Returns the client ID owning this discovery session.
+     */
+    public int getClientId() {
+        return mClientId;
+    }
+
     public int getSessionId() {
         return mSessionId;
     }

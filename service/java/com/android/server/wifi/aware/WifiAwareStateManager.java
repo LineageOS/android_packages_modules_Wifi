@@ -2956,6 +2956,9 @@ public class WifiAwareStateManager implements WifiAwareShellCommand.DelegatedShe
                     if (session != null) {
                         mActiveNdps.delete(ndpId);
                         cleanupNdi();
+                        if (mActiveNdps.size() > 0) {
+                            updateNetworkCapabilities();
+                        }
                         session.onDataPathTerminated(ndpId);
                     } else {
                         mDataPathMgr.onDataPathEnd(ndpId);
@@ -6753,6 +6756,7 @@ public class WifiAwareStateManager implements WifiAwareShellCommand.DelegatedShe
                     mConfirmHandlerHandler = null;
                 }
                 if (mNetworkAgent != null) {
+                    updateNetworkCapabilities();
                     mNetworkAgent.sendLinkProperties(newLp);
                 } else {
                     registerNetworkAgent(newLp);
@@ -6780,38 +6784,92 @@ public class WifiAwareStateManager implements WifiAwareShellCommand.DelegatedShe
         }
     }
 
-    private void registerNetworkAgent(LinkProperties lp) {
+    private Set<Integer> getActiveNdpUids() {
+        Set<Integer> uids = new HashSet<>();
+        for (int i = 0; i < mActiveNdps.size(); i++) {
+            WifiAwareDiscoverySessionState session = mActiveNdps.valueAt(i);
+            if (session != null) {
+                WifiAwareClientState clientState = mClients.get(session.getClientId());
+                if (clientState != null) {
+                    uids.add(clientState.getUid());
+                }
+            }
+        }
+        return uids;
+    }
+
+    private NetworkCapabilities createNetworkCapabilities(Set<Integer> activeUids) {
+        Set<android.util.Range<Integer>> uidRanges = new HashSet<>();
+        for (int uid : activeUids) {
+            uidRanges.add(new android.util.Range<>(uid, uid));
+        }
+
         NetworkCapabilities.Builder ncb = new NetworkCapabilities.Builder()
                 .addTransportType(NetworkCapabilities.TRANSPORT_WIFI_AWARE)
+                .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
                 .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
                 .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING)
                 .addCapability(NetworkCapabilities.NET_CAPABILITY_LOCAL_NETWORK)
                 .addCapability(NetworkCapabilities.NET_CAPABILITY_TRUSTED);
 
-        // This will make it so that only the requester UIDs can match this network in
-        // ConnectivityService, while other users can still access the network via the
-        // interface in the intent.
-        Set<android.util.Range<Integer>> uidRanges = new HashSet<>();
-        for (int i = 0; i < mClients.size(); i++) {
-            WifiAwareClientState clientState = mClients.valueAt(i);
-            uidRanges.add(new android.util.Range<>(clientState.getUid(), clientState.getUid()));
+        if (SdkLevel.isAtLeastT()) {
+            ncb.setAllowedUids(activeUids);
         }
         ncb.setUids(uidRanges);
+        return ncb.build();
+    }
+
+    private void registerNetworkAgent(LinkProperties lp) {
+        Set<Integer> activeUids = getActiveNdpUids();
+        NetworkCapabilities nc = createNetworkCapabilities(activeUids);
 
         NetworkAgentConfig nac = new NetworkAgentConfig.Builder().build();
-        mNetworkAgent = new WifiAwareLocalNetworkAgent(ncb.build(), lp, nac);
+        mNetworkAgent = new WifiAwareLocalNetworkAgent(nc, lp, nac);
         mNetworkAgent.sendNetworkScore(new NetworkScore.Builder()
                 .setKeepConnectedReason(3).build());
         mNetworkAgent.markConnected();
     }
 
-    private class WifiAwareLocalNetworkAgent extends NetworkAgent {
+    private void updateNetworkCapabilities() {
+        if (mNetworkAgent == null) {
+            return;
+        }
+        Set<Integer> activeUids = getActiveNdpUids();
+        mNetworkAgent.updateCapabilities(createNetworkCapabilities(activeUids));
+    }
+
+    @VisibleForTesting
+    public WifiAwareLocalNetworkAgent getNetworkAgent() {
+        return mNetworkAgent;
+    }
+
+    @VisibleForTesting
+    public NetworkCapabilities getNetworkCapabilities() {
+        return mNetworkAgent == null ? null : mNetworkAgent.getNetworkCapabilities();
+    }
+
+    @VisibleForTesting
+    public class WifiAwareLocalNetworkAgent extends NetworkAgent {
+        private NetworkCapabilities mNetworkCapabilities;
+
         WifiAwareLocalNetworkAgent(NetworkCapabilities nc, LinkProperties lp,
                 NetworkAgentConfig config) {
             super(mContext, mHandler.getLooper(), AGENT_TAG_PREFIX + mNdiName, nc, lp,
                     3, config, null);
+            mNetworkCapabilities = nc;
             register();
         }
+
+        @VisibleForTesting
+        public NetworkCapabilities getNetworkCapabilities() {
+            return mNetworkCapabilities;
+        }
+
+        void updateCapabilities(NetworkCapabilities nc) {
+            mNetworkCapabilities = nc;
+            sendNetworkCapabilities(nc);
+        }
+
         void reconfigureAgentAsDisconnected() {
             if (mVerboseLoggingEnabled) {
                 Log.v(TAG, "WifiAwareLocalNetworkAgent.reconfigureAgentAsDisconnected: NDI="
