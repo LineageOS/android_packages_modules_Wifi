@@ -84,6 +84,7 @@ import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.LinkProperties;
 import android.net.MacAddress;
+import android.net.NetworkCapabilities;
 import android.net.ip.IIpClient;
 import android.net.ip.IpClientCallbacks;
 import android.net.wifi.IBooleanListener;
@@ -222,6 +223,7 @@ public class WifiAwareStateManagerTest extends WifiBaseTest {
     @Mock private WifiGlobals mWifiGlobals;
     @Mock private WifiDiagnostics mMockWifiDiagnostics;
     @Mock private IIpClient mIpClient;
+    @Mock private ConnectivityManager mConnectivityManager;
     final ArgumentCaptor<WifiSettingsConfigStore.OnSettingsChangedListener>
             mD2dAllowedSettingChangedListenerCaptor =
             ArgumentCaptor.forClass(WifiSettingsConfigStore.OnSettingsChangedListener.class);
@@ -272,10 +274,9 @@ public class WifiAwareStateManagerTest extends WifiBaseTest {
 
         mMockLooper = new TestLooper();
 
-        when(mMockContext.getSystemService(Context.CONNECTIVITY_SERVICE)).thenReturn(
-                mock(ConnectivityManager.class));
-        when(mMockContext.getSystemService(ConnectivityManager.class)).thenReturn(
-                mock(ConnectivityManager.class));
+    when(mMockContext.getSystemService(Context.CONNECTIVITY_SERVICE))
+        .thenReturn(mConnectivityManager);
+    when(mMockContext.getSystemService(ConnectivityManager.class)).thenReturn(mConnectivityManager);
         when(mMockContext.getSystemService(Context.APP_OPS_SERVICE)).thenReturn(mMockAppOpsManager);
         when(mMockContext.getSystemServiceName(PowerManager.class)).thenReturn(
                 Context.POWER_SERVICE);
@@ -7001,4 +7002,262 @@ public class WifiAwareStateManagerTest extends WifiBaseTest {
         verify(mAwareMetricsMock).reportAwareInstantModeEnabled(anyBoolean());
         verifyNoMoreInteractions(mockSessionCallback, mMockNative, mAwareMetricsMock);
     }
+
+  /**
+   * Verify that when a multi-peer Aware Data Path (NDP) is confirmed and the NetworkAgent is
+   * registered, its NetworkCapabilities are restricted (NET_CAPABILITY_NOT_RESTRICTED removed) and
+   * scoped strictly to the UID of the client with an active NDP session (allowedUids and uids).
+   */
+  @Test
+  public void testMultiPeerNdpNetworkAgentCapabilities_restrictedAndScopedToActiveUid()
+      throws Exception {
+    assumeTrue(SdkLevel.isAtLeastU());
+    final int client1Id = 2005;
+    final int client1Uid = 10001;
+    final int client2Id = 2006;
+    final int client2Uid = 10002;
+    final int pid = 2000;
+    final String callingPackage1 = "com.google.client1";
+    final String callingPackage2 = "com.google.client2";
+    final String callingFeature = "com.google.feature";
+    final byte subscribeId = 15;
+    final int peerId = 20;
+    final int pairId = 1;
+    final int bootstrappingId = 101;
+    final byte[] peerMac = HexEncoding.decode("060708090A0B".toCharArray(), false);
+    final byte[] peerDataPathMac = HexEncoding.decode("0A0B0C0D0E0F".toCharArray(), false);
+    final String alias = "alias";
+    final byte[] ssi = "service specific info".getBytes();
+    final int ndpId = 1;
+
+    AwarePairingConfig pairingConfig =
+        new AwarePairingConfig(
+            true,
+            true,
+            true,
+            AwarePairingConfig.PAIRING_BOOTSTRAPPING_QR_SCAN,
+            WIFI_AWARE_CIPHER_SUITE_NCS_PK_PASN_128);
+
+    ConfigRequest configRequest = new ConfigRequest.Builder().setMasterPreference(5).build();
+    SubscribeConfig subscribeConfig =
+        new SubscribeConfig.Builder().setPairingConfig(pairingConfig).build();
+
+    IWifiAwareEventCallback mockCallback1 = mock(IWifiAwareEventCallback.class);
+    IWifiAwareEventCallback mockCallback2 = mock(IWifiAwareEventCallback.class);
+    IWifiAwareDiscoverySessionCallback mockSessionCallback =
+        mock(IWifiAwareDiscoverySessionCallback.class);
+    ArgumentCaptor<Short> transactionId = ArgumentCaptor.forClass(Short.class);
+    ArgumentCaptor<Integer> sessionId = ArgumentCaptor.forClass(Integer.class);
+    ArgumentCaptor<Integer> peerIdCaptor = ArgumentCaptor.forClass(Integer.class);
+
+    mDut.enableUsage();
+    mMockLooper.dispatchAll();
+    verify(mMockNative).getCapabilities(transactionId.capture());
+    when(mPairingConfigManager.getNikForCallingPackage(callingPackage1)).thenReturn(mNik);
+
+    // (1) Connect Client 1 (will initiate the NDP)
+    mDut.connect(
+        client1Id,
+        client1Uid,
+        pid,
+        callingPackage1,
+        callingFeature,
+        mockCallback1,
+        configRequest,
+        false,
+        mExtras,
+        false);
+    mMockLooper.dispatchAll();
+    verify(mMockNative)
+        .enableAndConfigure(
+            transactionId.capture(),
+            eq(configRequest),
+            eq(true),
+            eq(true),
+            eq(false),
+            eq(false),
+            eq(false),
+            anyInt(),
+            anyInt());
+    mDut.onConfigSuccessResponse(transactionId.getValue());
+    mMockLooper.dispatchAll();
+
+    // (2) Connect Client 2 (attached to Aware on the device, but NO active NDP)
+    mDut.connect(
+        client2Id,
+        client2Uid,
+        pid,
+        callingPackage2,
+        callingFeature,
+        mockCallback2,
+        configRequest,
+        false,
+        mExtras,
+        false);
+    mMockLooper.dispatchAll();
+    verify(mockCallback2).onConnectSuccess(client2Id);
+
+    // (3) Client 1 subscribes and matches peer
+    mDut.subscribe(client1Id, subscribeConfig, mockSessionCallback);
+    mMockLooper.dispatchAll();
+    mDut.onClusterChangeNotification(
+        IdentityChangedListener.CLUSTER_CHANGE_EVENT_STARTED, CLUSTER_ID);
+    mMockLooper.dispatchAll();
+    mMockLooper.moveTimeForward(60);
+    mMockLooper.dispatchAll();
+    verify(mMockNative)
+        .subscribe(transactionId.capture(), eq((byte) 0), eq(subscribeConfig), eq(mNik));
+
+    mDut.onSessionConfigSuccessResponse(transactionId.getValue(), false, subscribeId);
+    mMockLooper.dispatchAll();
+    verify(mockSessionCallback).onSessionStarted(sessionId.capture());
+
+    mDut.onMatchNotification(
+        subscribeId, peerId, peerMac, null, null, 0, 0, null, 0, null, null, pairingConfig, null);
+    mMockLooper.dispatchAll();
+    verify(mockSessionCallback)
+        .onMatch(
+            peerIdCaptor.capture(),
+            isNull(),
+            isNull(),
+            anyInt(),
+            isNull(),
+            isNull(),
+            any(),
+            isNull());
+    int publicPeerId = peerIdCaptor.getValue();
+
+    // (4) Complete Bootstrapping and Pairing
+    mDut.initiateBootStrappingSetupRequest(
+        client1Id,
+        sessionId.getValue(),
+        publicPeerId,
+        AwarePairingConfig.PAIRING_BOOTSTRAPPING_QR_SCAN,
+        0,
+        null,
+        ssi);
+    mMockLooper.dispatchAll();
+    verify(mMockNative)
+        .initiateBootstrapping(
+            transactionId.capture(),
+            eq(peerId),
+            eq(peerMac),
+            eq(AwarePairingConfig.PAIRING_BOOTSTRAPPING_QR_SCAN),
+            isNull(),
+            eq(subscribeId),
+            eq(false),
+            eq(ssi));
+    mDut.onInitiateBootStrappingResponseSuccess(transactionId.getValue(), bootstrappingId);
+    mDut.onBootstrappingConfirmNotification(
+        subscribeId,
+        bootstrappingId,
+        WifiAwareStateManager.NAN_BOOTSTRAPPING_ACCEPT,
+        NanStatusCode.SUCCESS,
+        0,
+        AwarePairingConfig.PAIRING_BOOTSTRAPPING_QR_SCAN,
+        null,
+        peerMac);
+    mMockLooper.dispatchAll();
+
+    mDut.initiateNanPairingSetupRequest(
+        client1Id,
+        sessionId.getValue(),
+        publicPeerId,
+        null,
+        alias,
+        WIFI_AWARE_CIPHER_SUITE_NCS_PK_PASN_128);
+    mMockLooper.dispatchAll();
+    verify(mMockNative)
+        .initiatePairing(
+            transactionId.capture(),
+            eq(peerId),
+            eq(peerMac),
+            eq(mNik),
+            eq(true),
+            eq(WifiAwareStateManager.NAN_PAIRING_REQUEST_TYPE_SETUP),
+            isNull(),
+            isNull(),
+            eq(WifiAwareStateManager.NAN_PAIRING_AKM_PASN),
+            eq(WIFI_AWARE_CIPHER_SUITE_NCS_PK_PASN_128),
+            eq((byte) subscribeId),
+            isNull());
+    mDut.onInitiatePairingResponseSuccess(transactionId.getValue(), pairId);
+    mMockLooper.dispatchAll();
+    mDut.onPairingConfirmNotification(
+        pairId,
+        true,
+        NanStatusCode.SUCCESS,
+        WifiAwareStateManager.NAN_PAIRING_REQUEST_TYPE_SETUP,
+        true);
+    mMockLooper.dispatchAll();
+    mDut.onPairingSecurityAssociationReceived(
+        pairId,
+        new PairingConfigManager.PairingSecurityAssociationInfo(
+            mPeerNik,
+            mNik,
+            mPmk,
+            WifiAwareStateManager.NAN_PAIRING_AKM_PASN,
+            WIFI_AWARE_CIPHER_SUITE_NCS_PK_PASN_128));
+    mMockLooper.dispatchAll();
+
+    // (5) Client 1 requests NDP
+    AwareDataPathRequest request = new AwareDataPathRequest.Builder().build();
+    mDut.requestDataPath(client1Id, sessionId.getValue(), publicPeerId, request);
+    mMockLooper.dispatchAll();
+    verify(mMockNative)
+        .initiateDataPath(
+            transactionId.capture(),
+            eq(peerId),
+            anyInt(),
+            anyInt(),
+            any(),
+            eq("aware_data0"),
+            eq(false),
+            isNull(),
+            any(),
+            any(),
+            eq(subscribeId),
+            eq(true));
+    mDut.onInitiateDataPathResponseSuccess(transactionId.getValue(), ndpId);
+    mMockLooper.dispatchAll();
+
+    // (6) Data path confirm and IP provisioning success
+    mDut.onDataPathConfirmNotification(
+        ndpId, peerDataPathMac, true, 0, null, List.of(AWARE_CHANNEL_INFO));
+    mMockLooper.dispatchAll();
+    verify(mIpClient).startProvisioning(any());
+    verify(mMockNative)
+        .enableAndConfigure(
+            transactionId.capture(),
+            eq(configRequest),
+            eq(false),
+            eq(true),
+            eq(false),
+            eq(false),
+            eq(false),
+            anyInt(),
+            anyInt());
+    mDut.onConfigSuccessResponse(transactionId.getValue());
+    mMockLooper.dispatchAll();
+
+    mIpClientCallback.onProvisioningSuccess(new LinkProperties());
+    mMockLooper.dispatchAll();
+
+    // (7) Verify registered NetworkAgent NetworkCapabilities
+    NetworkCapabilities nc = mDut.getNetworkCapabilities();
+    assertNotNull(nc);
+    assertTrue(nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI_AWARE));
+    assertTrue(nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_LOCAL_NETWORK));
+
+    // Assert that the network is restricted (NET_CAPABILITY_NOT_RESTRICTED removed)
+    assertFalse(
+        "NET_CAPABILITY_NOT_RESTRICTED must be removed for security isolation",
+        nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED));
+
+    // Assert allowedUids is strictly set to client1Uid (and excludes client2Uid)
+    assertEquals(Set.of(client1Uid), nc.getAllowedUids());
+
+    // Assert UIDs range is strictly scoped to client1Uid
+    assertEquals(Set.of(new android.util.Range<>(client1Uid, client1Uid)), nc.getUids());
+  }
 }
